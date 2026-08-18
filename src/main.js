@@ -5,6 +5,7 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import { World } from "./world.js";
 import { createUI } from "./ui.js";
 import { Controls } from "./controls.js";
+import { Player } from "./player.js";
 
 const stats = new Stats();
 document.body.append(stats.dom);
@@ -39,6 +40,8 @@ scene.add(world);
 
 const cameraControls = new PointerLockControls(camera, renderer.domElement);
 let controls = new Controls();
+
+const player = new Player(scene);
 
 setupLights();
 createUI(world);
@@ -76,10 +79,12 @@ function loop(ms) {
     controls.isButtonPressed("ShiftRight")
       ? 2
       : 1);
+
   // x/z and y movements stay on the global plane
   // controls.moveRight(dx * scaledSpeed * dt);
   // controls.moveForward(dz * scaledSpeed * dt);
   // controls.object.position.y += dy * scaledSpeed * dt;
+  
   // x/z camera local
   camera.translateX(dx * scaledSpeed * dt);
   camera.translateZ(-dz * scaledSpeed * dt);
