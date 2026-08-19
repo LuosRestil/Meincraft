@@ -43,7 +43,7 @@ let inputManager = new InputManager();
 const player = new Player(scene, inputManager);
 
 setupLights();
-createUI(world);
+createUI(world, player);
 
 let lastMs = 0;
 let moveSpeed = 10;
