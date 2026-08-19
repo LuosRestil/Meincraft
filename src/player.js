@@ -17,6 +17,10 @@ export class Player {
     this.camera.position.set(32, 16, 32);
     scene.add(this.camera);
     this.inputManager = inputManager;
+    this.positionDiv = document.getElementById("player-position");
+    if (!this.positionDiv) {
+      throw new Error("fuckass");
+    }
   }
 
   update(dt) {
@@ -38,6 +42,8 @@ export class Player {
     this.movementControls.moveRight(-this.velocity.x);
     this.movementControls.moveForward(this.velocity.z);
     this.movementControls.update(dt);
+
+    this.positionDiv.innerText = `x: ${this.position.x.toFixed(2)}, y: ${this.position.y.toFixed(2)}, z: ${this.position.z.toFixed(2)}`;
   }
 
   /**

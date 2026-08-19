@@ -3,3 +3,12 @@ body {
   padding: 0;
   box-sizing: border-box;
 }
+
+#player-position {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  font-family: monospace;
+  color: white;
+  font-size: 16px;
+}
