@@ -4,7 +4,7 @@ import { PointerLockControls } from "three/addons/controls/PointerLockControls.j
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { World } from "./world.js";
 import { createUI } from "./ui.js";
-import { Controls } from "./controls.js";
+import { InputManager } from "./inputManager.js";
 import { Player } from "./player.js";
 
 const stats = new Stats();
@@ -39,15 +39,16 @@ world.generate();
 scene.add(world);
 
 const cameraControls = new PointerLockControls(camera, renderer.domElement);
-let controls = new Controls();
+let inputManager = new InputManager();
 
-const player = new Player(scene);
+const player = new Player(scene, inputManager);
 
 setupLights();
 createUI(world);
 
 let lastMs = 0;
 let moveSpeed = 10;
+let activeCamera = camera;
 
 loop(0);
 
@@ -57,41 +58,46 @@ function loop(ms) {
   let dt = Math.min((ms - lastMs) / 1000, 0.1);
   lastMs = ms;
 
-  renderer.render(scene, camera);
-  stats.update();
-
-  if (controls.wasButtonJustPressed("KeyL")) {
+  if (inputManager.wasButtonJustPressed("KeyL")) {
     cameraControls.lock();
+  } else if (inputManager.wasButtonJustPressed("KeyK")) {
+    if (cameraControls.isLocked) {
+      activeCamera = player.camera;
+      player.movementControls.lock();
+    } else {
+      activeCamera = camera;
+      cameraControls.lock();
+    }
   }
 
-  let dx = 0;
-  let dy = 0;
-  let dz = 0;
-  if (controls.isButtonPressed("KeyW")) dz += 1;
-  if (controls.isButtonPressed("KeyS")) dz -= 1;
-  if (controls.isButtonPressed("KeyA")) dx -= 1;
-  if (controls.isButtonPressed("KeyD")) dx += 1;
-  if (controls.isButtonPressed("KeyQ")) dy += 1;
-  if (controls.isButtonPressed("KeyE")) dy -= 1;
-  let scaledSpeed =
-    moveSpeed *
-    (controls.isButtonPressed("ShiftLeft") ||
-    controls.isButtonPressed("ShiftRight")
-      ? 2
-      : 1);
+  renderer.render(scene, activeCamera);
+  stats.update();
 
-  // x/z and y movements stay on the global plane
-  // controls.moveRight(dx * scaledSpeed * dt);
-  // controls.moveForward(dz * scaledSpeed * dt);
-  // controls.object.position.y += dy * scaledSpeed * dt;
-  
-  // x/z camera local
-  camera.translateX(dx * scaledSpeed * dt);
-  camera.translateZ(-dz * scaledSpeed * dt);
-  cameraControls.object.position.y += dy * scaledSpeed * dt;
-  cameraControls.update(dt);
+  if (activeCamera === camera) {
+    let dx = 0;
+    let dy = 0;
+    let dz = 0;
+    if (inputManager.isButtonPressed("KeyW")) dz += 1;
+    if (inputManager.isButtonPressed("KeyS")) dz -= 1;
+    if (inputManager.isButtonPressed("KeyA")) dx -= 1;
+    if (inputManager.isButtonPressed("KeyD")) dx += 1;
+    if (inputManager.isButtonPressed("KeyQ")) dy += 1;
+    if (inputManager.isButtonPressed("KeyE")) dy -= 1;
+    let scaledSpeed =
+      moveSpeed *
+      (inputManager.isButtonPressed("ShiftLeft") ||
+      inputManager.isButtonPressed("ShiftRight")
+        ? 2
+        : 1);
+    camera.translateX(dx * scaledSpeed * dt);
+    camera.translateZ(-dz * scaledSpeed * dt);
+    cameraControls.object.position.y += dy * scaledSpeed * dt;
+    cameraControls.update(dt);
+  } else {
+    player.update(dt);
+  }
 
-  controls.update(); // must come after input reading for accuring wasButtonJustPressed
+  inputManager.update(); // must come after input reading for accuring wasButtonJustPressed
 }
 
 function setupLights() {
