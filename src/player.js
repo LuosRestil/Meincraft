@@ -48,8 +48,17 @@ export class Player {
     this.velocity.set(this.input.x * dt, this.velocity.y, this.input.z * dt);
     this.movementControls.moveRight(-this.velocity.x);
     this.movementControls.moveForward(this.velocity.z);
-    this.movementControls.update(dt);
 
+    this.movementControls.object.position.y += this.velocity.y * dt;
+
+    if (this.movementControls.object.position.y < 10) {
+      this.velocity.y = 0;
+      this.movementControls.object.position.y = 10;
+
+      // canJump = true;
+    }
+
+    this.movementControls.update(dt);
     this.positionDiv.innerText = `x: ${this.position.x.toFixed(2)}, y: ${this.position.y.toFixed(2)}, z: ${this.position.z.toFixed(2)}`;
 
     this.cameraHelper.update();
