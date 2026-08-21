@@ -5,8 +5,9 @@ import { blocks, blockTypes } from "./blocks.js";
 
 const blockGeometry = new THREE.BoxGeometry();
 
+/** @typedef {{typeId: number, instanceId: number | null}} Block */
+
 export class World extends THREE.Group {
-  /** @typedef {{typeId: number, instanceId: number | null}} Block */
   /**
    * @type Block[][][]}
    */
@@ -138,7 +139,11 @@ export class World extends THREE.Group {
       for (let y = 0; y < this.size.height; y++) {
         for (let z = 0; z < this.size.width; z++) {
           const block = this.getBlock(x, y, z);
-          if (!block || block.typeId === blockTypes.empty || this.isBlockObscured(x, y, z))
+          if (
+            !block ||
+            block.typeId === blockTypes.empty ||
+            this.isBlockObscured(x, y, z)
+          )
             continue;
           const mesh = meshes[block.typeId];
           const instanceId = mesh.count;

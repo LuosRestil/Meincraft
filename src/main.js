@@ -5,6 +5,7 @@ import { World } from "./world.js";
 import { createUI } from "./ui.js";
 import { InputManager } from "./inputManager.js";
 import { Player } from "./player.js";
+import { Physics } from "./physics.js";
 
 const stats = new Stats();
 document.body.append(stats.dom);
@@ -41,6 +42,8 @@ const cameraControls = new PointerLockControls(camera, renderer.domElement);
 let inputManager = new InputManager();
 
 const player = new Player(scene, inputManager);
+
+const physics = new Physics(scene);
 
 setupLights();
 createUI(world, player);
@@ -94,6 +97,7 @@ function loop(ms) {
     cameraControls.update(dt);
   } else {
     player.update(dt);
+    physics.update(dt, player, world);
   }
 
   inputManager.update(); // must come after input reading for accuring wasButtonJustPressed

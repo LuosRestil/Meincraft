@@ -14,6 +14,8 @@ export class Player {
   input = new THREE.Vector3();
   velocity = new THREE.Vector3();
   origin = [32, 16, 32];
+  radius = 0.5;
+  height = 1.75;
 
   constructor(scene, inputManager) {
     //@ts-ignore
@@ -26,6 +28,13 @@ export class Player {
     }
     this.cameraHelper.visible = false;
     scene.add(this.cameraHelper);
+
+    // wireframe mesh visualizing player's bounding cylinder
+    this.boundsHelper = new THREE.Mesh(
+      new THREE.CylinderGeometry(this.radius, this.radius, this.height),
+      new THREE.MeshBasicMaterial({ wireframe: true }),
+    );
+    scene.add(this.boundsHelper);
   }
 
   update(dt) {
@@ -62,6 +71,8 @@ export class Player {
     this.positionDiv.innerText = `x: ${this.position.x.toFixed(2)}, y: ${this.position.y.toFixed(2)}, z: ${this.position.z.toFixed(2)}`;
 
     this.cameraHelper.update();
+
+    this.updateBoundsHelper();
   }
 
   /**
@@ -75,5 +86,10 @@ export class Player {
     //@ts-ignore
     this.position.set(...this.origin);
     this.velocity.set(0, 0, 0);
+  }
+
+  updateBoundsHelper() {
+    this.boundsHelper.position.copy(this.position);
+    this.boundsHelper.position.y -= this.height / 2;
   }
 }
