@@ -13,7 +13,7 @@ export class InputManager {
     });
   }
 
-  update() {
+  clear() {
     for (let key in this.justPressed) {
       this.justPressed[key] = false;
     }

@@ -10,9 +10,12 @@ export class Player {
   );
   cameraHelper = new THREE.CameraHelper(this.camera);
   movementControls = new PointerLockControls(this.camera, document.body);
-  speed = 10;
+  speed = 5;
+  jumpSpeed = 10;
+  isGrounded = false;
   input = new THREE.Vector3();
   velocity = new THREE.Vector3();
+  #worldVelocity = new THREE.Vector3();
   origin = [32, 16, 32];
   radius = 0.5;
   height = 1.75;
@@ -35,11 +38,49 @@ export class Player {
       new THREE.MeshBasicMaterial({ wireframe: true }),
     );
     scene.add(this.boundsHelper);
+
+    this.playerPosHelper = new THREE.Mesh(
+      new THREE.SphereGeometry(0.05),
+      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+    );
+    scene.add(this.playerPosHelper);
   }
 
   update(dt) {
     if (this.inputManager.wasButtonJustPressed("KeyR")) this.reset();
 
+    this.positionDiv.innerText = `x: ${this.position.x.toFixed(2)}, y: ${this.position.y.toFixed(2)}, z: ${this.position.z.toFixed(2)}`;
+
+    this.updateHelpers();
+  }
+
+  /**
+   * @returns {THREE.Vector3}
+   */
+  get position() {
+    return this.camera.position;
+  }
+
+  /** Returns the velocity of the player in world coordinates
+   * @returns {THREE.Vector3}
+   */
+  get worldVelocity() {
+    this.#worldVelocity.copy(this.velocity);
+    this.#worldVelocity.applyEuler(new THREE.Euler(0, this.camera.rotation.y, 0));
+    return this.#worldVelocity;
+  }
+
+  reset() {
+    //@ts-ignore
+    this.position.set(...this.origin);
+    this.velocity.set(0, 0, 0);
+  }
+
+  move(dt) {
+    if (this.inputManager.wasButtonJustPressed("Space")) console.log("SPACE");
+    if (this.isGrounded && this.inputManager.wasButtonJustPressed("Space")) {
+      this.velocity.y += this.jumpSpeed;
+    }
     this.input.x = 0;
     this.input.z = 0;
     if (this.inputManager.isButtonPressed("KeyW")) this.input.z++;
@@ -51,45 +92,34 @@ export class Player {
       this.inputManager.isButtonPressed("ShiftLeft") ||
       this.inputManager.isButtonPressed("ShiftRight")
     ) {
-      scaledSpeed *= 2;
+      scaledSpeed += this.speed * 0.5;
     }
     this.input.normalize().multiplyScalar(scaledSpeed);
     this.velocity.set(this.input.x * dt, this.velocity.y, this.input.z * dt);
     this.movementControls.moveRight(-this.velocity.x);
     this.movementControls.moveForward(this.velocity.z);
-
     this.movementControls.object.position.y += this.velocity.y * dt;
 
-    if (this.movementControls.object.position.y < 10) {
-      this.velocity.y = 0;
-      this.movementControls.object.position.y = 10;
-
-      // canJump = true;
-    }
-
     this.movementControls.update(dt);
-    this.positionDiv.innerText = `x: ${this.position.x.toFixed(2)}, y: ${this.position.y.toFixed(2)}, z: ${this.position.z.toFixed(2)}`;
 
-    this.cameraHelper.update();
-
-    this.updateBoundsHelper();
+    this.inputManager.clear();
   }
 
   /**
-   * @returns {THREE.Vector3}
+   * Applies a change in velocity that is specified in the world space
+   * @param {THREE.Vector3} dv 
    */
-  get position() {
-    return this.camera.position;
+  applyWorldDeltaVelocity(dv) {
+    dv.applyEuler(new THREE.Euler(0, -this.camera.rotation.y, 0));
+    this.velocity.add(dv);
   }
 
-  reset() {
-    //@ts-ignore
-    this.position.set(...this.origin);
-    this.velocity.set(0, 0, 0);
-  }
+  updateHelpers() {
+    this.cameraHelper.update();
 
-  updateBoundsHelper() {
     this.boundsHelper.position.copy(this.position);
     this.boundsHelper.position.y -= this.height / 2;
+
+    this.playerPosHelper.position.copy(this.position);
   }
 }

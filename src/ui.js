@@ -6,6 +6,7 @@ export function createUI(world, player) {
 
   let playerFolder = gui.addFolder("Player");
   playerFolder.add(player, "speed", 1, 20)?.name("Speed");
+  playerFolder.add(player, "jumpSpeed", 1, 10)?.name("Jump Speed");
   playerFolder.add(player.cameraHelper, "visible")?.name("Show Camera");
 
   const terrainFolder = gui.addFolder("Terrain");

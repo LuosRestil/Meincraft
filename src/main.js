@@ -99,8 +99,6 @@ function loop(ms) {
     player.update(dt);
     physics.update(dt, player, world);
   }
-
-  inputManager.update(); // must come after input reading for accuring wasButtonJustPressed
 }
 
 function setupLights() {

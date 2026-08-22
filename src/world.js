@@ -147,7 +147,7 @@ export class World extends THREE.Group {
             continue;
           const mesh = meshes[block.typeId];
           const instanceId = mesh.count;
-          matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
+          matrix.setPosition(x, y, z);
           mesh.setMatrixAt(instanceId, matrix);
           this.setInstanceId(x, y, z, instanceId);
           mesh.count++;
