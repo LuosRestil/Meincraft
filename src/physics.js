@@ -4,11 +4,8 @@ import { World } from "./world.js";
 import { blockTypes } from "./blocks.js";
 import "./world.js";
 
-/** @import { Block } from "./world.js" */
 /** @typedef {{x: number, y: number, z: number}} Vec3 */
 /** @typedef {{block: Vec3, contactPoint: Vec3, normal: THREE.Vector3, overlap: number}} Collision */
-
-let logGrounded = false;
 
 const collisionMaterial = new THREE.MeshBasicMaterial({
   color: 0xff0000,
@@ -30,7 +27,7 @@ export class Physics {
 
   constructor(scene) {
     this.helpers = new THREE.Group();
-    // this.helpers.visible = false;
+    this.helpers.visible = false;
     scene.add(this.helpers);
   }
 
@@ -140,12 +137,6 @@ export class Physics {
           normal = new THREE.Vector3(0, -Math.sign(dy), 0);
           overlap = overlapY;
           player.isGrounded = true;
-          if (logGrounded) {
-            console.log(`overlapY: ${overlapY}`);
-            console.log(`overlapXZ: ${overlapXZ}`);
-            // debugger;
-            logGrounded = false;
-          }
         } else {
           normal = new THREE.Vector3(-dx, 0, -dz).normalize();
           overlap = overlapXZ;

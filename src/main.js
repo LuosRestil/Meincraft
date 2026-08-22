@@ -46,7 +46,7 @@ const player = new Player(scene, inputManager);
 const physics = new Physics(scene);
 
 setupLights();
-createUI(world, player);
+createUI(world, player, physics);
 
 let lastMs = 0;
 let moveSpeed = 10;
@@ -66,9 +66,13 @@ function loop(ms) {
     if (cameraControls.isLocked) {
       activeCamera = player.camera;
       player.movementControls.lock();
+      player.boundsHelper.visible = false;
+      player.playerPosHelper.visible = false;
     } else {
       activeCamera = camera;
       cameraControls.lock();
+      player.boundsHelper.visible = true;
+      player.playerPosHelper.visible = true;
     }
   }
 
@@ -95,6 +99,7 @@ function loop(ms) {
     camera.translateZ(-dz * scaledSpeed * dt);
     cameraControls.object.position.y += dy * scaledSpeed * dt;
     cameraControls.update(dt);
+    inputManager.clear();
   } else {
     player.update(dt);
     physics.update(dt, player, world);

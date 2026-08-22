@@ -34,8 +34,8 @@ export class Player {
 
     // wireframe mesh visualizing player's bounding cylinder
     this.boundsHelper = new THREE.Mesh(
-      new THREE.CylinderGeometry(this.radius, this.radius, this.height),
-      new THREE.MeshBasicMaterial({ wireframe: true }),
+      new THREE.CylinderGeometry(this.radius, this.radius, this.height, 16),
+      new THREE.MeshBasicMaterial({ wireframe: true, color: 0x808080 }),
     );
     scene.add(this.boundsHelper);
 
@@ -77,7 +77,6 @@ export class Player {
   }
 
   move(dt) {
-    if (this.inputManager.wasButtonJustPressed("Space")) console.log("SPACE");
     if (this.isGrounded && this.inputManager.wasButtonJustPressed("Space")) {
       this.velocity.y += this.jumpSpeed;
     }
