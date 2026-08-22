@@ -42,9 +42,6 @@ export class Physics {
       this.elapsed -= this.timestep;
 
       player.velocity.y -= this.gravity * this.timestep;
-      if (player.inputManager.wasButtonJustPressed("Space")) {
-        logGrounded = true;
-      }
       player.move(this.timestep);
 
       this.handleCollisions(player, world);
