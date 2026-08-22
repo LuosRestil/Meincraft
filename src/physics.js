@@ -141,8 +141,9 @@ export class Physics {
           overlap = overlapY;
           player.isGrounded = true;
           if (logGrounded) {
-            debugger;
-            console.log("grounded!");
+            console.log(`overlapY: ${overlapY}`);
+            console.log(`overlapXZ: ${overlapXZ}`);
+            // debugger;
             logGrounded = false;
           }
         } else {
@@ -166,7 +167,7 @@ export class Physics {
    * @param {Player} player
    */
   resolveCollisions(collisions, player) {
-    collisions.sort((a, b) => a.overlap - b.overlap);
+    collisions.sort((a, b) => b.overlap - a.overlap);
     for (const collision of collisions) {
       // recheck if contact point is inside player bounding box, as prior resolutions may have nullified the collision
       if (!this.isPointInPlayerBoundingCylinder(collision.contactPoint, player))
@@ -183,6 +184,7 @@ export class Physics {
       // get magnitude of player velocity along collision normal
       let mag = player.worldVelocity.dot(collision.normal);
       let adjustment = collision.normal.clone().multiplyScalar(mag);
+      if (collision.normal.y === 1 && player.velocity.y > 0) continue;
       player.applyWorldDeltaVelocity(adjustment.negate());
     }
   }
