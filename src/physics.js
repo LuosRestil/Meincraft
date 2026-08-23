@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { Player } from "./player.js";
-import { WorldChunk } from "./worldChunk.js";
 import { blockTypes } from "./blocks.js";
 import "./worldChunk.js";
+import { World } from "./world.js";
 
 /** @typedef {{x: number, y: number, z: number}} Vec3 */
 /** @typedef {{block: Vec3, contactPoint: Vec3, normal: THREE.Vector3, overlap: number}} Collision */
@@ -34,7 +34,7 @@ export class Physics {
   /**
    * @param {number} dt
    * @param {Player} player
-   * @param {WorldChunk} world
+   * @param {World} world
    */
   update(dt, player, world) {
     this.elapsed += dt;
@@ -50,7 +50,7 @@ export class Physics {
 
   /**
    * @param {Player} player
-   * @param {WorldChunk} world
+   * @param {World} world
    */
   handleCollisions(player, world) {
     this.helpers.clear();
@@ -64,7 +64,7 @@ export class Physics {
 
   /**
    * @param {Player} player
-   * @param {WorldChunk} world
+   * @param {World} world
    * @returns {{x: number, y: number, z: number}[]}
    */
   broadPhase(player, world) {
@@ -133,7 +133,9 @@ export class Physics {
         if (overlapY < overlapXZ) {
           normal = new THREE.Vector3(0, -Math.sign(dy), 0);
           overlap = overlapY;
-          player.isGrounded = true;
+          if (!(normal.y === 1 && player.velocity.y > 0)) {
+            player.isGrounded = true;
+          }
         } else {
           normal = new THREE.Vector3(-dx, 0, -dz).normalize();
           overlap = overlapXZ;
@@ -162,12 +164,9 @@ export class Physics {
         continue;
 
       // adjust player position to remove overlap
-      let deltaPos = collision.normal.clone();
-      deltaPos.multiplyScalar(collision.overlap);
-      player.position.add(deltaPos);
-      // player.position.add(
-      //   collision.normal.clone().multiplyScalar(collision.overlap),
-      // );
+      player.position.add(
+        collision.normal.clone().multiplyScalar(collision.overlap),
+      );
       // negate player velocity along collision normal
       // get magnitude of player velocity along collision normal
       let mag = player.worldVelocity.dot(collision.normal);

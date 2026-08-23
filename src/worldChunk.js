@@ -21,11 +21,16 @@ export class WorldChunk extends THREE.Group {
   }
 
   generate() {
+    this.loaded = false;
+
+    let start = performance.now();
     const rng = new RNG(this.params.seed);
     this.initializeTerrain();
     this.generateResources(rng);
     this.generateTerrain(rng);
     this.generateMeshes();
+
+    this.loaded = true;
   }
 
   initializeTerrain() {
@@ -60,9 +65,9 @@ export class WorldChunk extends THREE.Group {
           for (let y = 0; y < this.size.height; y++) {
             for (let z = 0; z < this.size.width; z++) {
               const value = noise.noise3d(
-                x / (block.scale?.x ?? 1),
-                y / (block.scale?.y ?? 1),
-                z / (block.scale?.z ?? 1),
+                (this.position.x + x) / (block.scale?.x ?? 1),
+                (this.position.y + y) / (block.scale?.y ?? 1),
+                (this.position.z + z) / (block.scale?.z ?? 1),
               );
               if (value > block.scarcity) {
                 this.setTypeId(x, y, z, block.typeId);
@@ -79,8 +84,8 @@ export class WorldChunk extends THREE.Group {
       for (let z = 0; z < this.size.width; z++) {
         // compute noise value at this (x, z) location
         const value = noise.noise(
-          x / this.params.terrain.scale,
-          z / this.params.terrain.scale,
+          (this.position.x + x) / this.params.terrain.scale,
+          (this.position.z + z) / this.params.terrain.scale,
         );
         // scale by magnitude/offset
         const scaledValue =
@@ -218,5 +223,13 @@ export class WorldChunk extends THREE.Group {
       this.getBlock(x, y, z + 1)?.typeId ?? blockTypes.empty,
       this.getBlock(x, y, z - 1)?.typeId ?? blockTypes.empty,
     ].every((type) => type !== blockTypes.empty);
+  }
+
+  disposeInstances() {
+    this.traverse(obj => {
+      // @ts-ignore
+      if (obj.dispose) obj.dispose();
+    });
+    this.clear();
   }
 }

@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
-import { WorldChunk } from "./worldChunk.js";
 import { createUI } from "./ui.js";
 import { InputManager } from "./inputManager.js";
 import { Player } from "./player.js";
@@ -35,11 +34,10 @@ window.addEventListener("resize", () => {
 });
 
 const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x80a0e0, 50, 75);
 const world = new World();
+world.generate();
 scene.add(world);
-// const worldChunk = new WorldChunk({ width: 64, height: 32 });
-// worldChunk.generate();
-// scene.add(worldChunk);
 
 const cameraControls = new PointerLockControls(camera, renderer.domElement);
 let inputManager = new InputManager();
@@ -48,6 +46,9 @@ const player = new Player(scene, inputManager);
 
 const physics = new Physics(scene);
 
+/** @type THREE.DirectionalLight */
+let sun;
+let sunPos = new THREE.Vector3(50, 50, 50);
 setupLights();
 createUI(world, player, physics);
 
@@ -104,29 +105,36 @@ function loop(ms) {
     cameraControls.update(dt);
     inputManager.clear();
   } else {
-    player.update(dt);
-    physics.update(dt, player, worldChunk);
+    player.update(dt, world);
+    physics.update(dt, player, world);
+    world.update(player);
+
+    sun.position.set(player.position.x + sunPos.x, sunPos.y, player.position.z + sunPos.z);
+    sun.target.position.set(player.position.x, sun.target.position.y, player.position.z);
   }
 }
 
 function setupLights() {
-  const sun = new THREE.DirectionalLight();
-  sun.position.set(50, 50, 50);
+  sun = new THREE.DirectionalLight();
+  sun.position.copy(sunPos);
+  sun.intensity = 1.5;
   sun.castShadow = true;
-  sun.shadow.camera.left = -50;
-  sun.shadow.camera.right = 50;
-  sun.shadow.camera.bottom = -50;
-  sun.shadow.camera.top = 50;
+  sun.shadow.camera.left = -40;
+  sun.shadow.camera.right = 40;
+  sun.shadow.camera.bottom = -40;
+  sun.shadow.camera.top = 40;
   sun.shadow.camera.near = 0.1;
-  sun.shadow.camera.far = 100;
-  sun.shadow.bias = -0.001;
-  sun.shadow.mapSize = new THREE.Vector2(512, 512);
+  sun.shadow.camera.far = 200;
+  sun.shadow.bias = -0.0001;
+  sun.shadow.mapSize = new THREE.Vector2(2048, 2048);
   scene.add(sun);
+  scene.add(sun.target);
+  console.log(sun.target);
 
   const shadowHelper = new THREE.CameraHelper(sun.shadow.camera);
-  // scene.add(shadowHelper);
+  scene.add(shadowHelper);
 
   const ambientLight = new THREE.AmbientLight();
-  ambientLight.intensity = 0.5;
+  ambientLight.intensity = 0.2;
   scene.add(ambientLight);
 }

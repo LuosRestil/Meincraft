@@ -15,8 +15,12 @@ export function createUI(world, player, physics) {
   physicsFolder.close();
 
   const terrainFolder = gui.addFolder("Terrain");
-  terrainFolder.add(world.params.chunkSize, "width", 8, 128, 1)?.name("Width");
-  terrainFolder.add(world.params.chunkSize, "height", 8, 128, 1)?.name("Height");
+  // terrainFolder.add(world.params.chunkSize, "width", 8, 128, 1)?.name("Width");
+  // terrainFolder.add(world.params.chunkSize, "height", 8, 128, 1)?.name("Height");
+  terrainFolder.add(world, "loadAsync")?.name("Load Async");
+  terrainFolder
+    .add(world.params, "renderDistance", 1, 20)
+    ?.name("Render Distance");
   terrainFolder.add(world.params, "seed", 0, 10_000)?.name("Seed");
   terrainFolder.add(world.params.terrain, "scale", 10, 100)?.name("Scale");
   terrainFolder.add(world.params.terrain, "magnitude", 0, 1)?.name("Magnitude");

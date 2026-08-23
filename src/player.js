@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 
+const CENTER_SCREEN = new THREE.Vector2();
+
 export class Player {
   camera = new THREE.PerspectiveCamera(
     70,
@@ -16,9 +18,10 @@ export class Player {
   input = new THREE.Vector3();
   velocity = new THREE.Vector3();
   #worldVelocity = new THREE.Vector3();
-  origin = [32, 16, 32];
+  origin = [16, 16, 16];
   radius = 0.5;
   height = 1.75;
+  raycaster = new THREE.Raycaster();
 
   constructor(scene, inputManager) {
     //@ts-ignore
@@ -44,14 +47,29 @@ export class Player {
       new THREE.MeshBasicMaterial({ color: 0xff0000 }),
     );
     scene.add(this.playerPosHelper);
+
+    this.raycaster.near = 0;
+    this.raycaster.far = 3;
   }
 
-  update(dt) {
+  update(dt, world) {
     if (this.inputManager.wasButtonJustPressed("KeyR")) this.reset();
 
     this.positionDiv.innerText = `x: ${this.position.x.toFixed(2)}, y: ${this.position.y.toFixed(2)}, z: ${this.position.z.toFixed(2)}`;
 
     this.updateHelpers();
+
+    this.updateRaycaster(world);
+  }
+
+  updateRaycaster(world) {
+    this.raycaster.setFromCamera(CENTER_SCREEN, this.camera);
+    const intersections = this.raycaster.intersectObjects(world, true);
+    if (intersections.length) {
+
+    } else {
+      
+    }
   }
 
   /**
@@ -77,7 +95,7 @@ export class Player {
   }
 
   move(dt) {
-    if (this.isGrounded && this.inputManager.wasButtonJustPressed("Space")) {
+    if (this.isGrounded && this.inputManager.isButtonPressed("Space")) {
       this.velocity.y += this.jumpSpeed;
     }
     this.input.x = 0;
