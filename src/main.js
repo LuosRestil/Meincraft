@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
-import { World } from "./world.js";
+import { WorldChunk } from "./worldChunk.js";
 import { createUI } from "./ui.js";
 import { InputManager } from "./inputManager.js";
 import { Player } from "./player.js";
 import { Physics } from "./physics.js";
+import { World } from "./world.js";
 
 const stats = new Stats();
 document.body.append(stats.dom);
@@ -34,9 +35,11 @@ window.addEventListener("resize", () => {
 });
 
 const scene = new THREE.Scene();
-const world = new World({ width: 64, height: 32 });
-world.generate();
+const world = new World();
 scene.add(world);
+// const worldChunk = new WorldChunk({ width: 64, height: 32 });
+// worldChunk.generate();
+// scene.add(worldChunk);
 
 const cameraControls = new PointerLockControls(camera, renderer.domElement);
 let inputManager = new InputManager();
@@ -102,7 +105,7 @@ function loop(ms) {
     inputManager.clear();
   } else {
     player.update(dt);
-    physics.update(dt, player, world);
+    physics.update(dt, player, worldChunk);
   }
 }
 

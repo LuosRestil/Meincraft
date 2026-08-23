@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { Player } from "./player.js";
-import { World } from "./world.js";
+import { WorldChunk } from "./worldChunk.js";
 import { blockTypes } from "./blocks.js";
-import "./world.js";
+import "./worldChunk.js";
 
 /** @typedef {{x: number, y: number, z: number}} Vec3 */
 /** @typedef {{block: Vec3, contactPoint: Vec3, normal: THREE.Vector3, overlap: number}} Collision */
@@ -34,7 +34,7 @@ export class Physics {
   /**
    * @param {number} dt
    * @param {Player} player
-   * @param {World} world
+   * @param {WorldChunk} world
    */
   update(dt, player, world) {
     this.elapsed += dt;
@@ -50,7 +50,7 @@ export class Physics {
 
   /**
    * @param {Player} player
-   * @param {World} world
+   * @param {WorldChunk} world
    */
   handleCollisions(player, world) {
     this.helpers.clear();
@@ -64,7 +64,7 @@ export class Physics {
 
   /**
    * @param {Player} player
-   * @param {World} world
+   * @param {WorldChunk} world
    * @returns {{x: number, y: number, z: number}[]}
    */
   broadPhase(player, world) {

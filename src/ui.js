@@ -8,18 +8,19 @@ export function createUI(world, player, physics) {
   playerFolder.add(player, "speed", 1, 20)?.name("Speed");
   playerFolder.add(player, "jumpSpeed", 1, 10)?.name("Jump Speed");
   playerFolder.add(player.cameraHelper, "visible")?.name("Show Camera");
+  playerFolder.close();
 
   let physicsFolder = gui.addFolder("Physics");
   physicsFolder.add(physics.helpers, "visible")?.name("Show Helpers");
+  physicsFolder.close();
 
   const terrainFolder = gui.addFolder("Terrain");
-  terrainFolder.add(world.size, "width", 8, 128, 1)?.name("Width");
-  terrainFolder.add(world.size, "height", 8, 128, 1)?.name("Height");
+  terrainFolder.add(world.params.chunkSize, "width", 8, 128, 1)?.name("Width");
+  terrainFolder.add(world.params.chunkSize, "height", 8, 128, 1)?.name("Height");
   terrainFolder.add(world.params, "seed", 0, 10_000)?.name("Seed");
   terrainFolder.add(world.params.terrain, "scale", 10, 100)?.name("Scale");
   terrainFolder.add(world.params.terrain, "magnitude", 0, 1)?.name("Magnitude");
   terrainFolder.add(world.params.terrain, "offset", 0, 1)?.name("Offset");
-
   terrainFolder.close();
 
   const resourcesFolder = gui.addFolder("Resources");
