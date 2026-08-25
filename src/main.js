@@ -129,7 +129,6 @@ function setupLights() {
   sun.shadow.mapSize = new THREE.Vector2(2048, 2048);
   scene.add(sun);
   scene.add(sun.target);
-  console.log(sun.target);
 
   const shadowHelper = new THREE.CameraHelper(sun.shadow.camera);
   scene.add(shadowHelper);

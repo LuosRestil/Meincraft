@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
+import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 
 const CENTER_SCREEN = new THREE.Vector2();
 
@@ -48,8 +51,18 @@ export class Player {
     );
     scene.add(this.playerPosHelper);
 
+    const selectionBoxGeometry = new THREE.BoxGeometry(1.01, 1.01, 1.01);
+    const selectionEdgeGeometry = new THREE.EdgesGeometry(selectionBoxGeometry);
+    const selectionFatLineGeometry = new LineSegmentsGeometry().fromEdgesGeometry(selectionEdgeGeometry);
+    const selectionMaterial = new LineMaterial({ color: 0x000000, linewidth: 4 });
+    this.selectionHelper = new LineSegments2(
+      selectionFatLineGeometry,
+      selectionMaterial,
+    );
+    scene.add(this.selectionHelper);
+
     this.raycaster.near = 0;
-    this.raycaster.far = 3;
+    this.raycaster.far = 4;
   }
 
   update(dt, world) {
@@ -64,11 +77,26 @@ export class Player {
 
   updateRaycaster(world) {
     this.raycaster.setFromCamera(CENTER_SCREEN, this.camera);
-    const intersections = this.raycaster.intersectObjects(world, true);
+    const intersections = this.raycaster.intersectObject(world, true);
+    console.log(intersections.length);
     if (intersections.length) {
+      const intersection = intersections[0];
+      const instancedMesh = intersection.object;
+      const chunk = instancedMesh.parent;
+      if (chunk === null) return;
+      // get transform of intersected block
+      const blockMatrix = new THREE.Matrix4();
+      // @ts-ignore
+      intersection.object.getMatrixAt(intersection.instanceId, blockMatrix);
 
+      this.selectedCoords = chunk.position.clone();
+      this.selectedCoords.applyMatrix4(blockMatrix);
+      this.selectionHelper.position.copy(this.selectedCoords);
+      this.selectionHelper.visible = true;
+      console.log(JSON.stringify(this.selectedCoords));
     } else {
-      
+      this.selectedCoords = null;
+      this.selectionHelper.visible = false;
     }
   }
 
@@ -84,7 +112,9 @@ export class Player {
    */
   get worldVelocity() {
     this.#worldVelocity.copy(this.velocity);
-    this.#worldVelocity.applyEuler(new THREE.Euler(0, this.camera.rotation.y, 0));
+    this.#worldVelocity.applyEuler(
+      new THREE.Euler(0, this.camera.rotation.y, 0),
+    );
     return this.#worldVelocity;
   }
 
@@ -124,7 +154,7 @@ export class Player {
 
   /**
    * Applies a change in velocity that is specified in the world space
-   * @param {THREE.Vector3} dv 
+   * @param {THREE.Vector3} dv
    */
   applyWorldDeltaVelocity(dv) {
     dv.applyEuler(new THREE.Euler(0, -this.camera.rotation.y, 0));
